@@ -3,12 +3,14 @@
 from pathlib import Path
 
 from PyQt6.QtCore import QPoint, Qt, QTimer
-from PyQt6.QtGui import QMouseEvent, QPixmap
-from PyQt6.QtWidgets import QLabel, QWidget
+from PyQt6.QtGui import QKeyEvent, QMouseEvent, QPixmap, QShortcut, QKeySequence
+from PyQt6.QtWidgets import QApplication, QLabel, QWidget
 
 from animation_manager import AnimationManager, State
 from behavior_engine import trigger_bounce, trigger_random_walk
-from popup_window import InteractionPopup
+
+ESC_TIMEOUT_MS = 800
+from popup_window import InteractionPopup, PET_SIZE_DEFAULT
 
 
 class DesktopPet(QWidget):
@@ -20,6 +22,8 @@ class DesktopPet(QWidget):
         super().__init__(parent)
         self._drag_offset: QPoint = QPoint()
         self._popup: InteractionPopup | None = None
+        self._pet_scale: int = PET_SIZE_DEFAULT  # height in px
+        self._esc_count: int = 0
 
         self._setup_window()
         self._setup_assets()
@@ -36,11 +40,17 @@ class DesktopPet(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self._label = QLabel(self)
         self._label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
+        self._esc_timer = QTimer(self)
+        self._esc_timer.setSingleShot(True)
+        self._esc_timer.timeout.connect(lambda: setattr(self, '_esc_count', 0))
+
     def _setup_assets(self) -> None:
-        self.anim_state = AnimationManager(self.ASSETS_DIR)
+        self.anim_state = AnimationManager(self.ASSETS_DIR, target_height=self._pet_scale)
         first_frame = self.anim_state.next_frame()
         self._label.setPixmap(first_frame)
         self._label.resize(first_frame.size())
@@ -67,6 +77,19 @@ class DesktopPet(QWidget):
         self._label.setPixmap(pix)
 
     # ------------------------------------------------------------------
+    # Resize the pet (called from the size slider in popup)
+    # ------------------------------------------------------------------
+    def resize_pet(self, target_height: int) -> None:
+        """Re-scale all sprite frames and resize the window."""
+        self._pet_scale = target_height
+        self.anim_state.set_target_height(target_height)
+        # Actualizar tamaño visual con el primer frame disponible
+        first = self.anim_state.next_frame()
+        self._label.setPixmap(first)
+        self._label.resize(first.size())
+        self.resize(first.size())
+
+    # ------------------------------------------------------------------
     # Behaviour timer
     # ------------------------------------------------------------------
     def _schedule_next_walk(self) -> None:
@@ -80,7 +103,7 @@ class DesktopPet(QWidget):
         self._schedule_next_walk()
 
     # ------------------------------------------------------------------
-    # Mouse events — drag / right-click / double-click
+    # Mouse events
     # ------------------------------------------------------------------
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         if event is None:
@@ -111,8 +134,21 @@ class DesktopPet(QWidget):
             lambda: self.anim_state.set_state(State.IDLE)
         )
         self._react_timer.start(1500)
-
         event.accept()
+
+    # ------------------------------------------------------------------
+    # Key event — double Esc closes the app
+    # ------------------------------------------------------------------
+    def keyPressEvent(self, event: QKeyEvent | None) -> None:
+        if event is None:
+            return
+        if event.key() == Qt.Key.Key_Escape:
+            self._esc_count += 1
+            if self._esc_count >= 2:
+                QApplication.quit()
+            else:
+                self._esc_timer.start(ESC_TIMEOUT_MS)
+        super().keyPressEvent(event)
 
     # ------------------------------------------------------------------
     # Popup
@@ -130,9 +166,10 @@ class DesktopPet(QWidget):
     # ------------------------------------------------------------------
     # Cleanup
     # ------------------------------------------------------------------
-    def closeEvent(self, event: __import__("PyQt6.QtCore", fromlist=["QEvent"]).QEvent) -> None:  # type: ignore[name-defined]  # noqa
+    def closeEvent(self, event) -> None:
         self._anim_timer.stop()
         self._behave_timer.stop()
         if self._react_timer is not None:
             self._react_timer.stop()
+        self._esc_timer.stop()
         super().closeEvent(event)
