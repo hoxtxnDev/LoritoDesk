@@ -1,88 +1,88 @@
-# Lorito — Interactive Desktop Pet 🦜
+# Lorito — Mascota de Escritorio Interactiva 🦜
 
-A frameless, always-on-top desktop pet application built with Python and PyQt6. The lorito (parrot) walks around your screen, reacts to clicks, and you can chat with it via a retro-styled speech-bubble popup.
+Aplicación de mascota de escritorio sin bordes, siempre al frente, construida con Python y PyQt6. El lorito camina por tu pantalla, reacciona a clics y puedes chatear con él mediante una burbuja de diálogo de estilo retro.
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.11-green)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Licencia](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+## Características
 
-- **Frameless window** — no title bar, no taskbar entry, stays on top
-- **Drag anywhere** — left-click and drag to reposition
-- **Right-click chat** — opens a cyberpunk-style input popup
-- **Double-click bounce** — the pet jumps with a squash-and-stretch animation
-- **Autonomous walking** — random screen walks every 8–20 seconds with smooth easing
-- **Sprite animations** — IDLE (breathing), TALK (beak), WALK (cycle), REACT (bounce)
-- **Chroma-key transparency** — green screen removal with configurable tolerance
+- **Ventana sin bordes** — sin barra de título, sin entrada en la barra de tareas, siempre al frente
+- **Arrastrar** — clic izquierdo y arrastra para reposicionar
+- **Chat con clic derecho** — abre un popup de entrada estilo cyberpunk
+- **Rebote al doble clic** — la mascota salta con animación de estiramiento
+- **Caminata autónoma** — paseos aleatorios por la pantalla cada 8–20 segundos con easing suave
+- **Animaciones por sprites** — IDLE (respiración), TALK (pico), WALK (ciclo), REACT (salto)
+- **Transparencia chroma-key** — eliminación de fondo verde con tolerancia configurable
 
-## Requirements
+## Requisitos
 
 - Python 3.10+
 - [PyQt6](https://pypi.org/project/PyQt6/)
 - [Pillow](https://pypi.org/project/Pillow/)
 
-## Installation
+## Instalación
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/lorito-desktop-pet.git
+# Clonar el repositorio
+git clone https://github.com/tuusuario/lorito-desktop-pet.git
 cd lorito-desktop-pet
 
-# Install dependencies
+# Instalar dependencias
 pip install PyQt6 Pillow
 
-# Run
+# Ejecutar
 python desktop_pet/main.py
 ```
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 desktop_pet/
-├── main.py                 # Entry point
-├── pet_window.py           # DesktopPet QWidget (transparency, drag, animation loop)
-├── popup_window.py         # InteractionPopup QDialog (input field, speech bubble)
-├── animation_manager.py    # AnimationManager (state machine: IDLE, TALK, WALK, REACT)
-├── behavior_engine.py      # Random autonomous movement + bounce reaction
-├── chroma_key.py           # Utility: remove #00ff00 background from sprite frames
+├── main.py                 # Punto de entrada
+├── pet_window.py           # DesktopPet QWidget (transparencia, arrastre, bucle de animación)
+├── popup_window.py         # InteractionPopup QDialog (campo de texto, burbuja de diálogo)
+├── animation_manager.py    # AnimationManager (máquina de estados: IDLE, TALK, WALK, REACT)
+├── behavior_engine.py      # Movimiento autónomo aleatorio + reacción de rebote
+├── chroma_key.py           # Utilidad: elimina fondo #00ff00 de los sprites
 └── assets/
-    ├── lorito_idle.png     # Sprite sheet — 4 frames, idle loop
-    ├── lorito_talk.png     # Sprite sheet — 4 frames, beak open/close
-    └── lorito_walk.png     # Sprite sheet — 6 frames, walk cycle
+    ├── lorito_idle.png     # Sprite sheet — 4 fotogramas, bucle idle
+    ├── lorito_talk.png     # Sprite sheet — 4 fotogramas, apertura/cierre de pico
+    └── lorito_walk.png     # Sprite sheet — 6 fotogramas, ciclo de caminata
 ```
 
-## Controls
+## Controles
 
-| Action | Effect |
+| Acción | Efecto |
 |--------|--------|
-| Left-click + drag | Move the pet |
-| Right-click | Open chat popup |
-| Double-click | Bounce / react animation |
-| Type + Enter in popup | Pet talks, displays speech bubble |
-| Click outside popup | Close popup |
+| Clic izquierdo + arrastrar | Mover la mascota |
+| Clic derecho | Abrir popup de chat |
+| Doble clic | Animación de rebote / reacción |
+| Escribir + Enter en popup | La mascota habla, muestra burbuja de texto |
+| Clic fuera del popup | Cerrar popup |
 
-## Sprite Sheet Generation
+## Generación de Sprite Sheets
 
-The sprite sheets were generated as horizontal strips on a `#00ff00` green screen background:
+Los sprite sheets se generaron como tiras horizontales sobre un fondo verde `#00ff00`:
 
-| Sheet | Frames | Frame Size |
-|-------|--------|------------|
+| Hoja | Fotogramas | Tamaño por fotograma |
+|------|------------|----------------------|
 | `lorito_idle.png` | 4 | 443×887 |
 | `lorito_talk.png` | 4 | 443×887 |
 | `lorito_walk.png` | 6 | 295×887 |
 
-To generate your own, use any pixel-art generator with a green screen background (`#00ff00`, no gradients, no anti-aliasing at edges).
+Para generar los tuyos, usa cualquier generador de pixel art con fondo verde (`#00ff00`, sin degradados, sin anti-aliasing en los bordes).
 
-## Configuration
+## Configuración
 
-Edit `chroma_key.py` to adjust the green-screen tolerance:
+Edita `chroma_key.py` para ajustar la tolerancia del chroma-key:
 
 ```python
-TOLERANCE = 40  # default — lower = stricter green detection
+TOLERANCIA = 40  # valor por defecto — menor = detección de verde más estricta
 ```
 
-## Compatibility
+## Compatibilidad
 
 - Windows 10/11 ✓
-- Linux (X11) ✓ (untested on Wayland)
+- Linux (X11) ✓ (no probado en Wayland)
